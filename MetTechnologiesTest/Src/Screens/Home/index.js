@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Image, StyleSheet, StatusBar, Dimensions, TextInput, TouchableOpacity, FlatList, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, StatusBar, Dimensions, TextInput, TouchableOpacity, FlatList,  ActivityIndicator } from 'react-native';
 const Devicewidth = Dimensions.get('window').width;
 const Deviceheight = Dimensions.get('window').height;
 const axios = require('axios');
@@ -34,7 +34,8 @@ export default class Home extends Component {
 		super(props)
 		this.state = {
 			BuisnessData: [],
-			FilterModal: false
+			FilterModal: false,
+			loader: false
 		}
 	}
 	state = this.state;
@@ -43,6 +44,9 @@ export default class Home extends Component {
 		this.GetBuisness()
 	}
 	GetBuisness = () => {
+		this.setState({
+			loader: true
+		})
 		const object = {
 			"user_id": "",
 			"category_ids": '',
@@ -55,10 +59,14 @@ export default class Home extends Component {
 			.then(response => {
 				this.setState({
 					BuisnessData: response.data.data.business_data,
+					loader: false
 				})
 			})
 			.catch(error => {
 				// console.log("my buisness data error", error);
+				this.setState({
+					loader: false
+				})
 			})
 	}
 	closeModal = () => {
@@ -67,6 +75,9 @@ export default class Home extends Component {
 		})
 	}
 	HandelFilterChoice = (value) => {
+		this.setState({
+			loader: true
+		})
 		let object = {}
 		if (value == 0) {
 			object = {
@@ -142,10 +153,14 @@ export default class Home extends Component {
 			.then(response => {
 				this.setState({
 					BuisnessData: response.data.data.business_data,
+					loader: false
 				})
 			})
 			.catch(error => {
 				// console.log("my buisness data error", error);
+				this.setState({
+					loader: false
+				})
 			})
 
 	}
@@ -235,28 +250,32 @@ export default class Home extends Component {
 							<TouchableOpacity style={{
 								height: Deviceheight / 30,
 								width: Devicewidth / 18, alignItems: "center", justifyContent: "center", alignSelf: "center",
-							}} >
+							}} onPress={() => this.props.navigation.navigate('map')}>
 								<Image source={require("../../Assets/HeaderLocation.png")} style={{ height: "100%", width: "100%", resizeMode: 'cover', }} />
 							</TouchableOpacity>
 						</View>
 					</View>
 
 					<View style={styles.FlatlistContainer1}>
-						<FlatList
-							data={this.state.BuisnessData}
-							horizontal={false}
-							showsVerticalScrollIndicator={false}
-							keyExtractor={(item, index) => index.toString()}
-							renderItem={({ item }) => (
-								<SingelBuisnessList
-									Image={item.business_image}
-									Name={item.title}
-									Description={item.description}
-									Ratting={item.avrg_rating}
-									Distance={item.distance}
-								/>
-							)}
-						/>
+						{this.state.loader == true ?
+							<ActivityIndicator size="large" color="#44A9FB" animating={this.state.loader}/>
+							:
+							<FlatList
+								data={this.state.BuisnessData}
+								horizontal={false}
+								showsVerticalScrollIndicator={false}
+								keyExtractor={(item, index) => index.toString()}
+								renderItem={({ item }) => (
+									<SingelBuisnessList
+										Image={item.business_image}
+										Name={item.title}
+										Description={item.description}
+										Ratting={item.avrg_rating}
+										Distance={item.distance}
+									/>
+								)}
+							/>
+						}
 					</View>
 				</View>
 				<Footer />
@@ -278,7 +297,6 @@ const styles = StyleSheet.create({
 		justifyContent: "flex-end",
 		fontSize: 14,
 		textAlign: "left",
-		// backgroundColor:"green"
 	},
 	SearchIcon: {
 		alignSelf: 'center',
@@ -287,7 +305,6 @@ const styles = StyleSheet.create({
 		height: Deviceheight / 40,
 		width: Devicewidth / 20,
 		marginHorizontal: 5,
-		// backgroundColor:"grey"
 	},
 	FlatlistContainer: {
 		padding: 5,
@@ -295,7 +312,6 @@ const styles = StyleSheet.create({
 		width: Devicewidth,
 		alignItems: 'center',
 		justifyContent: 'center',
-		// backgroundColor: "yellow"
 	},
 	FlatlistContainer1: {
 		padding: 5,
@@ -303,6 +319,5 @@ const styles = StyleSheet.create({
 		width: Devicewidth,
 		alignItems: 'center',
 		justifyContent: 'center',
-		// backgroundColor: "yellow"
 	},
 })
